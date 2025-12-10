@@ -75,7 +75,6 @@ def handle_missing(df, missing_threshold=0.5, fill_method="median"):
 
     missing_counts = df.isna().sum()
 
-    # Drop columns with too many missing values
     to_drop = missing_counts[missing_counts / len(df) > missing_threshold].index
 
     if len(to_drop) > 0:
@@ -86,7 +85,6 @@ def handle_missing(df, missing_threshold=0.5, fill_method="median"):
     else:
         print("No columns exceed missing threshold.")
 
-    # Fill remaining missing values
     for col in df.columns:
         if df[col].isna().sum() > 0:
             if pd.api.types.is_numeric_dtype(df[col]):
@@ -159,7 +157,7 @@ def fix_types(df):
 
     type_map = {
         "Year": "Int64",
-        "Population": "Float64",
+        "Population": "Int64",
         "Latitude": "Float64",
         "Longitude": "Float64",
         "Temperature": "Float64",
@@ -171,14 +169,14 @@ def fix_types(df):
         if col in df.columns:
             try:
                 df[col] = df[col].astype(dtype)
-                print(f"Converted {col} → {dtype}")
+                print(f"Converted {col} -> {dtype}")
             except:
                 print(f"Could not convert {col}.")
 
     return df
 
 
-def validate_ranges(df, year_range=(1980, 2010)):
+def validate_ranges(df, year_range=(1970, 2025)):
     """
     Validate numeric ranges and filter out invalid values.
 
@@ -205,9 +203,9 @@ def validate_ranges(df, year_range=(1980, 2010)):
     yr_min, yr_max = year_range
 
     if "Year" in df.columns:
-        before = len(df)
+        before_len = len(df)
         df = df[(df["Year"] >= yr_min) & (df["Year"] <= yr_max)]
-        print(f"Removed {before - len(df)} rows with invalid years.")
+        print(f"Removed {before_len - len(df)} rows with invalid years.")
 
     return df
 
