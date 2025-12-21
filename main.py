@@ -10,9 +10,9 @@ import data.cleaner as cleaner
 
 df = pd.read_csv("./data/cleaned_bird_data.csv")
 
-title_rq1 = "Reseach Question: How have bird populations of climate-sensitive species changed across Asia, and how are these changes associated with regional trends in temperature, precipitation, and urbanization?"
+title_spyros = "Reseach Question: How have bird populations of climate-sensitive species changed across Asia, and how are these changes associated with regional trends in temperature, precipitation, and urbanization?"
 
-description_rq1 = (
+description_spyros = (
     "This analysis examines how populations of climate-sensitive bird species have changed "
     "across Asian regions over time, and investigates how these population trends are related "
     "to variations in temperature, precipitation, and levels of urbanization. By linking "
@@ -38,65 +38,88 @@ description_rq2 = "This analysis explores how the maximum annual movement distan
 app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
 app.layout = dbc.Container([
-    html.Div([
-        html.H1("Bird Population & Environmental Trends", 
-                className="mb-2",
-                style={'color': '#1a365d', 'fontWeight': '600'}),
-        html.P("Analyzing climate-sensitive species across Asia",
-               style={'color': '#64748b', 'fontSize': '1.1rem'})
-    ], className="my-4 pb-3", style={'borderBottom': '3px solid #3b82f6'}),
+# Research Question 1 (Spyros)
+    html.H1(
+        "Bird Population & Environmental Trends",
+        className="text-center my-4"
+    ),
+    dbc.Row(
+        dbc.Col(
+            html.H3(
+                title_spyros,
+                className="text-primary"
+            ),
+            width=12
+        ),
+        className="mb-3 mx-3"
+    ),
     
-    dbc.Card([
-        dbc.CardBody([
-            html.H5("Research Question", className="mb-2", style={'color': '#1e40af'}),
-            html.P("Spyridon Mitsis", className="text-muted small mb-2"),
-            html.P(title_rq1, style={'lineHeight': '1.6'})
-        ])
-    ], className="mb-4", style={'border': 'none', 'boxShadow': '0 2px 8px rgba(0,0,0,0.08)'}),
+    dbc.Row(
+        dbc.Col(
+            html.H4(
+                "By Spyridon Mitsis",
+                className="lead"
+            ),
+            width=12
+        ),
+        className="mb-3 mx-3"
+    ),
     
-    dbc.Row([
+    dbc.Row(
+        dbc.Col(
+            html.P(
+                description_spyros,
+                className="lead"
+            ),
+            width=12
+        ),
+        className="mb-4 mx-3"
+    ),
+    
+    # Dropdown
+    dbc.Row(
         dbc.Col([
-            html.Label("Select Species", className="fw-semibold mb-2", 
-                      style={'color': '#334155'}),
+            html.Label("Select Species:"),
             dcc.Dropdown(
                 id='species-dropdown',
-                options=[{'label': s, 'value': s} for s in sorted(df["Bird_Species"].unique())],
+                options=[{'label': s, 'value': s} for s in sorted(df["bird_species"].unique())],
                 value='Siberian Crane',
                 clearable=False
             )
-        ], width=12, md=6)
-    ], className="mb-4"),
+        ], width=6),
+        justify="center",
+        className="mb-4"
+    ),
     
-    dbc.Card([
-        dbc.CardBody([
-            html.H5("Correlation with Environmental Variables", 
-                   className="mb-3",
-                   style={'color': '#1e40af'}),
-            html.Div(id='correlation-table')
-        ])
-    ], className="mb-4", style={'border': 'none', 'boxShadow': '0 2px 8px rgba(0,0,0,0.08)'}),
+    # Correlation Table
+    dbc.Row(
+        dbc.Col(
+            dbc.Card(
+                dbc.CardBody([
+                    html.H5(
+                        "Correlation with Environmental Variables",
+                        className="text-primary mb-3"
+                    ),
+                    html.Div(id='correlation-table')
+                ])
+            ),
+            width=10
+        ),
+        justify="center",
+        className="mb-4"
+    ),
     
+    # Plots
     dbc.Row([
-        dbc.Col([
-            dbc.Card([
-                dbc.CardHeader("Population vs Environmental Factors", 
-                              style={'backgroundColor': '#f8fafc', 'fontWeight': '600'}),
-                dbc.CardBody([
-                    dcc.Graph(id='graph-1', config={'displayModeBar': False})
-                ])
-            ], style={'border': 'none', 'boxShadow': '0 2px 8px rgba(0,0,0,0.08)'})
-        ], width=12, lg=7, className="mb-4 mb-lg-0"),
-        
-        dbc.Col([
-            dbc.Card([
-                dbc.CardHeader("Population Change Over Time",
-                              style={'backgroundColor': '#f8fafc', 'fontWeight': '600'}),
-                dbc.CardBody([
-                    dcc.Graph(id='graph-2', config={'displayModeBar': False})
-                ])
-            ], style={'border': 'none', 'boxShadow': '0 2px 8px rgba(0,0,0,0.08)'})
-        ], width=12, lg=5)
-    ], className="mb-4"),
+        dbc.Col(
+            dcc.Graph(id='graph-1', config={'displayModeBar': False}),
+            width=7
+        ),
+        dbc.Col(
+            dcc.Graph(id='graph-2', config={'displayModeBar': False}),
+            width=5
+        )
+    ], className="mb-5"),
 
 
  #research question 2
@@ -191,7 +214,7 @@ def update_graph(species):
             plot_bgcolor='white',
             paper_bgcolor='white',
             font={'family': 'system-ui, -apple-system, sans-serif', 'size': 12},
-            margin=dict(t=10, b=10, l=10, r=10)
+            margin=dict(t=80, b=10, l=10, r=10)
         )
     
     corr_df = spyros_rs.compute_corr_with_env(modeled_df_spyros, species)

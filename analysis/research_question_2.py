@@ -28,9 +28,9 @@ def get_bird_shift_climate_and_land_usage_data(df):
     # Standardize column names for consistency and ease of access
     #df.columns = [col.strip().lower().replace(" ", "_") for col in df.columns]
     # Get unique countries,bird species and years in the dataset
-    countries=set(df["Country"])
-    bird_species_set=set(df["Bird_Species"])
-    years=set(df["Year"])
+    countries=set(df["country"])
+    bird_species_set=set(df["bird_species"])
+    years=set(df["year"])
 
     # Get sorted list, since sets are unordered
     country_list = sorted(list(countries))
@@ -50,8 +50,8 @@ def get_bird_shift_climate_and_land_usage_data(df):
             """ The dataset is first filtered by country and species, and
               then further filtered by year to extract annual movement statistics."""
             country_species_df = df[
-                (df["Country"] == country) &
-                (df["Bird_Species"] == bird_species)
+                (df["country"] == country) &
+                (df["bird_species"] == bird_species)
             ]
             # Skip if no data exists for this country–species combination
             if country_species_df.empty:
@@ -62,14 +62,14 @@ def get_bird_shift_climate_and_land_usage_data(df):
 
                 """annual_data contains records for this species in this country for the given year"""
                 # Filter data for the current year
-                annual_data = country_species_df[country_species_df["Year"] == year]
+                annual_data = country_species_df[country_species_df["year"] == year]
 
                 # Skip if no data exists for this year
                 if annual_data.empty:
                     continue
 
                 # Identify the row with the maximum shift distance
-                max_row = annual_data.loc[annual_data["Shift_km"].idxmax()]
+                max_row = annual_data.loc[annual_data["shift_km"].idxmax()]
 
                 """ A list of dictionaries is used to store year-specific summary records 
                     that can be efficiently transformed into a DataFrame"""
@@ -79,9 +79,9 @@ def get_bird_shift_climate_and_land_usage_data(df):
                     "country": country,
                     "bird_species": bird_species,
                     "year": year,
-                    "max_shift_km": max_row["Shift_km"],
-                    "population_at_max_shift": max_row["Population"],
-                    "temperature_at_max_shift": max_row["Temperature"]
+                    "max_shift_km": max_row["shift_km"],
+                    "population_at_max_shift": max_row["population"],
+                    "temperature_at_max_shift": max_row["temperature"]
                 })
 
     # Convert collected statistics into a DataFrame and sort by year
