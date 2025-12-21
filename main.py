@@ -2,7 +2,7 @@ from dash import Dash, html, dcc, callback, Output, Input
 import dash_ag_grid as dag
 import pandas as pd
 import analysis.spyros_rs as spyros_rs
-import analysis.research_question_2 as research_question_2
+import analysis.hafsa_rs as hafsa_rs
 import dash_bootstrap_components as dbc
 import data.cleaner as cleaner
 
@@ -24,10 +24,10 @@ modeled_df_spyros = cleaner.model_data_spyros(df)
 
 #research question 2
 # modeled dataset
-modeled_df_rq2 = research_question_2.get_bird_shift_climate_and_land_usage_data(df)
+modeled_df_hafsa = cleaner.get_bird_shift_climate_and_land_usage_data(df)
 # Get unique countries and species
-countries=set(modeled_df_rq2["country"])
-bird_species=set(modeled_df_rq2["bird_species"])
+countries=set(modeled_df_hafsa["country"])
+bird_species=set(modeled_df_hafsa["bird_species"])
 
 # Get a sorted list of  countries  and species for dropdown items
 country_list = sorted(list(countries))
@@ -260,8 +260,8 @@ def update_plots(selected_country, selected_bird_species):
     """
     Updates dashboard plots based on selected country and bird species.
     """
-    bar_fig,line_fig = research_question_2.plot_bird_shift_climate_and_land_usage_data(
-        modeled_df_rq2,
+    bar_fig,line_fig = hafsa_rs.plot_bird_shift_climate_and_land_usage_data(
+        modeled_df_hafsa,
         selected_country,
         selected_bird_species
     )

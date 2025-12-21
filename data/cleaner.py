@@ -334,6 +334,88 @@ def model_data_spyros(df: pd.DataFrame) -> pd.DataFrame:
     return df_merged
 
 
+def get_bird_shift_climate_and_land_usage_data(df):
+    """
+    Extracts climate and land usage related statistics for bird species by country and year.
+    For each combination of country, bird species, and year, this function:
+    - Filters the dataset to matching records
+    - Identifies the row with the maximum geographic shift (shift_km)
+    - Collects the population and temperature values associated with that maximum shift
+
+    The result is a summary DataFrame showing how bird species’ maximum
+    range shifts relate to population and temperature over time.
+
+    :param df: Input DataFrame containing bird climate data.
+    
+               Required columns: country, bird_species, year,
+               shift_km, population, temperature
+    :return: Summary DataFrame with maximum shift statistics per year
+    """
+    # Standardize column names for consistency and ease of access
+    #df.columns = [col.strip().lower().replace(" ", "_") for col in df.columns]
+    # Get unique countries,bird species and years in the dataset
+    countries=set(df["country"])
+    bird_species_set=set(df["bird_species"])
+    years=set(df["year"])
+
+    # Get sorted list, since sets are unordered
+    country_list = sorted(list(countries))
+    bird_species_list = sorted((bird_species_set))
+    year_list = sorted(list(years))
+
+    # Initialize a list to store summary statistics for each year
+    stats_by_year = []
+
+    # Loop through each country
+    for country in country_list:
+
+        # Loop through each bird species
+        for bird_species in bird_species_list:
+
+            # Filter the DataFrame for the current country and species
+            """ The dataset is first filtered by country and species, and
+              then further filtered by year to extract annual movement statistics."""
+            country_species_df = df[
+                (df["country"] == country) &
+                (df["bird_species"] == bird_species)
+            ]
+            # Skip if no data exists for this country–species combination
+            if country_species_df.empty:
+                continue
+
+            # Loop through each year
+            for year in year_list:
+
+                """annual_data contains records for this species in this country for the given year"""
+                # Filter data for the current year
+                annual_data = country_species_df[country_species_df["year"] == year]
+
+                # Skip if no data exists for this year
+                if annual_data.empty:
+                    continue
+
+                # Identify the row with the maximum shift distance
+                max_row = annual_data.loc[annual_data["shift_km"].idxmax()]
+
+                """ A list of dictionaries is used to store year-specific summary records 
+                    that can be efficiently transformed into a DataFrame"""
+                
+                # Store the extracted statistics
+                stats_by_year.append({
+                    "country": country,
+                    "bird_species": bird_species,
+                    "year": year,
+                    "max_shift_km": max_row["shift_km"],
+                    "population_at_max_shift": max_row["population"],
+                    "temperature_at_max_shift": max_row["temperature"]
+                })
+
+    # Convert collected statistics into a DataFrame and sort by year
+    bird_shift_climate_and_land_usage_data = pd.DataFrame(stats_by_year).sort_values(by="year")
+
+    # Return the final summarized DataFrame
+    return bird_shift_climate_and_land_usage_data
+
 
 if __name__ == "__main__":
     cleaned = clean_bird_data("./Occurance_and_climatedata_of_birds.csv")
