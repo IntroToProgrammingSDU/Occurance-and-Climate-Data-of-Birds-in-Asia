@@ -1,13 +1,26 @@
 from dash import Dash, html, dcc, callback, Output, Input
 import dash_ag_grid as dag
 import pandas as pd
-import analysis.rs1 as rs1
+import analysis.spyros_rs as spyros_rs
 import analysis.research_question_2 as research_question_2
 import dash_bootstrap_components as dbc
+import data.cleaner as cleaner
+
+
 
 df = pd.read_csv("./data/cleaned_bird_data.csv")
-title_rq1 = "How have bird populations of climate-sensitive species changed across Asia, and how are these changes associated with regional trends in temperature, precipitation, and urbanization?"
-fixed_df = rs1.prepare_data(df)
+
+title_rq1 = "Reseach Question: How have bird populations of climate-sensitive species changed across Asia, and how are these changes associated with regional trends in temperature, precipitation, and urbanization?"
+
+description_rq1 = (
+    "This analysis examines how populations of climate-sensitive bird species have changed "
+    "across Asian regions over time, and investigates how these population trends are related "
+    "to variations in temperature, precipitation, and levels of urbanization. By linking "
+    "population dynamics with environmental factors, the analysis aims to highlight patterns "
+    "that may indicate ecological responses to climate and land-use change."
+)
+
+modeled_df_spyros = cleaner.model_data_spyros(df)
 
 #research question 2
 # modeled dataset
@@ -169,8 +182,8 @@ app.layout = dbc.Container([
 )
 def update_graph(species):
     # Figures
-    fig1 = rs1.plot_population_vs_env(fixed_df, species)
-    fig2 = rs1.get_population_change(fixed_df, species)
+    fig1 = spyros_rs.plot_population_vs_env(modeled_df_spyros, species)
+    fig2 = spyros_rs.get_population_change(modeled_df_spyros, species)
     
     # Clean figure styling
     for fig in [fig1, fig2]:
@@ -181,7 +194,7 @@ def update_graph(species):
             margin=dict(t=10, b=10, l=10, r=10)
         )
     
-    corr_df = rs1.compute_corr_with_env(fixed_df, species)
+    corr_df = spyros_rs.compute_corr_with_env(modeled_df_spyros, species)
     
     table_rows = []
     for var, val in zip(corr_df.index, corr_df[species]):

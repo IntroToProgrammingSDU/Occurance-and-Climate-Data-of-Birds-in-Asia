@@ -165,6 +165,7 @@ def fix_types(df):
         "Shift_km": "Float64"
     }
 
+
     for col, dtype in type_map.items():
         if col in df.columns:
             try:
@@ -248,6 +249,14 @@ def clean_text(df):
 
     return df
 
+def lowercase_columns(df):
+    """
+    Convert DataFrame column names to lowercase.
+    """
+    df.columns = df.columns.str.lower()
+    return df
+
+
 
 def clean_bird_data(input_file, output_file="cleaned_bird_data.csv"):
     """
@@ -273,6 +282,7 @@ def clean_bird_data(input_file, output_file="cleaned_bird_data.csv"):
     4. Fix data types
     5. Validate numeric ranges
     6. Clean text fields
+    7. Column names to lowercase
     Saves the cleaned CSV to `output_file`.
     """
     df = load_data(input_file)
@@ -281,6 +291,7 @@ def clean_bird_data(input_file, output_file="cleaned_bird_data.csv"):
     df = fix_types(df)
     df = validate_ranges(df)
     df = clean_text(df)
+    df = lowercase_columns(df)
 
     save_dir = os.path.join(os.path.dirname(__file__), "..", "data")
     os.makedirs(save_dir, exist_ok=True)
@@ -290,7 +301,41 @@ def clean_bird_data(input_file, output_file="cleaned_bird_data.csv"):
     return df
 
 
+def model_data_spyros(df: pd.DataFrame) -> pd.DataFrame:
+    # Aggregate population per species per year
+    df_yearly = df.groupby(["bird_species", "year"])["population"].sum().reset_index()
+
+    # Pivot population table
+    df_pivot = (
+        df_yearly.pivot(
+            index="year",
+            columns="bird_species",
+            values="population"
+        ).reset_index()
+    )
+
+    # Compute average temperature, precipitation, traffic per year
+    df_avg = (
+        df.groupby("year")[["temperature", "precipitation", "traffic"]]
+        .mean()
+        .reset_index()
+    )
+
+    # Merge population pivot with environmental variables
+    df_merged = (
+        pd.merge(
+            df_pivot,
+            df_avg,
+            on="year",
+            how="inner"
+        )
+    )
+
+    return df_merged
+
+
+
 if __name__ == "__main__":
-    cleaned = clean_bird_data("../data/Occurance_and_climatedata_of_birds.csv")
+    cleaned = clean_bird_data("./Occurance_and_climatedata_of_birds.csv")
     print("\nCleaning complete!")
 

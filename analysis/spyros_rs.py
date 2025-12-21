@@ -4,41 +4,6 @@ import dash
 import plotly.express as px
 
 
-def prepare_data(df: pd.DataFrame) -> pd.DataFrame:
-    # Aggregate population per species per year
-    df_yearly = df.groupby(["Bird_Species", "Year"])["Population"].sum().reset_index()
-
-    # Pivot population table
-    df_pivot = (
-        df_yearly.pivot(
-            index="Year",
-            columns="Bird_Species",
-            values="Population"
-        ).reset_index()
-    )
-
-    # Compute average temperature, precipitation, traffic per year
-    df_avg = (
-        df.groupby("Year")[["Temperature", "Precipitation", "Traffic"]]
-        .mean()
-        .reset_index()
-    )
-
-    # Merge population pivot with environmental variables
-    df_merged = (
-        pd.merge(
-            df_pivot,
-            df_avg,
-            on="Year",
-            how="inner"
-        )
-    )
-
-
-    return df_merged
-
-
-
 def plot_population_vs_env(df: pd.DataFrame, species: str):
     df_sorted = df.sort_values("Year")
     
