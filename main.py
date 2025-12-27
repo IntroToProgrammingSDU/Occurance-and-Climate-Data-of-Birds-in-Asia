@@ -3,6 +3,7 @@ import dash_ag_grid as dag
 import pandas as pd
 import analysis.spyros_rs as spyros_rs
 import analysis.hafsa_rs as hafsa_rs
+import analysis.mahfuz_rs as mahfuz_rs
 import dash_bootstrap_components as dbc
 import data.cleaner as cleaner
 
@@ -34,6 +35,24 @@ country_list = sorted(list(countries))
 bird_species_list = sorted(list(bird_species))
 title_rq2 = "Research Question: Can bird movement patterns (Shift_km) be used as early-warning indicators of climate (Temperature) and land-use (Population) change across Asian ecosystems from 1980–2010? "
 description_rq2 = "This analysis explores how the maximum annual movement distance (Shift_km) of bird species changes over time within each country, and how these temporal shifts occur in relation to climatic conditions and population levels, supporting the idea that changes in movement patterns can act as early indicators of environmental change."
+
+
+# ========= Research Question 3 (Mahfuz) =========
+species_per_country = mahfuz_rs.build_species_per_country_table(df)
+species_diversity_fig = mahfuz_rs.plot_species_diversity_by_country(species_per_country)
+
+title_rq3 = (
+    "Research Question: How does bird species diversity vary across countries, "
+    "and which country stands out as the richest habitat?"
+)
+
+description_rq3 = (
+    "This analysis compares bird species diversity across Asian countries in our "
+    "dataset. All countries have the same number of recorded bird species, so no "
+    "single country clearly stands out as the richest habitat here, which suggests "
+    "that the dataset is too limited to capture true differences in diversity."
+)
+
 
 app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
@@ -190,9 +209,61 @@ app.layout = dbc.Container([
             )
         ], width=6)
 
-    ], className="mb-4")
-    
-], fluid=True, style={'backgroundColor': '#f9fafb', 'minHeight': '100vh', 'padding': '2rem 1rem'})
+    ], className="mb-4"),
+        html.H1(
+            "Bird Species Diversity Dashboard",
+            className="text-center my-4",
+        ),
+        dbc.Row(
+            dbc.Col(
+                html.H3(
+                    title_rq3,
+                    className="text-primary",
+                ),
+                width=12,
+            ),
+            className="mb-3 mx-3",
+        ),
+        dbc.Row(
+            dbc.Col(
+                html.H4(
+                    "By Mahfuz",
+                    className="lead",
+                ),
+                width=12,
+            ),
+            className="mb-3 mx-3",
+        ),
+        dbc.Row(
+            dbc.Col(
+                html.P(
+                    description_rq3,
+                    className="lead",
+                ),
+                width=12,
+            ),
+            className="mb-4 mx-3",
+        ),
+        dbc.Row(
+            dbc.Col(
+                dcc.Graph(
+                    id="species-diversity-graph",
+                    figure=species_diversity_fig,
+                    style={"height": "70vh"},
+                ),
+                width=10,
+            ),
+            justify="center",
+            className="mb-4",
+        ),
+    ],
+    fluid=True,
+    style={
+        "backgroundColor": "#f9fafb",
+        "minHeight": "100vh",
+        "padding": "2rem 1rem",
+    },
+)
 
 
 

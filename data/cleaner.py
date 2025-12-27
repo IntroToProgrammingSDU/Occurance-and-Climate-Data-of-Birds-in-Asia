@@ -416,6 +416,18 @@ def get_bird_shift_climate_and_land_usage_data(df):
     # Return the final summarized DataFrame
     return bird_shift_climate_and_land_usage_data
 
+def model_data_mahfuz(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Prepare data for Mahfuz's question:
+    "How many different bird species are observed in each country?"
+    """
+    species_per_country = (
+        df.groupby("country")["bird_species"]
+        .nunique()
+        .reset_index(name="species_count")
+    )
+    return species_per_country
+
 
 if __name__ == "__main__":
     cleaned = clean_bird_data("./Occurance_and_climatedata_of_birds.csv")
