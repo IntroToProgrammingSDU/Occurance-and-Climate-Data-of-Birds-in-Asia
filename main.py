@@ -4,6 +4,7 @@ import pandas as pd
 import analysis.spyros_rs as spyros_rs
 import analysis.hafsa_rs as hafsa_rs
 import analysis.mahfuz_rs as mahfuz_rs
+import analysis.hafijur_rs as hafijur_rs
 import dash_bootstrap_components as dbc
 import data.cleaner as cleaner
 
@@ -210,63 +211,104 @@ app.layout = dbc.Container([
         ], width=6)
 
     ], className="mb-4"),
-        html.H1(
-            "Bird Species Diversity Dashboard",
-            className="text-center my-4",
-        ),
-        dbc.Row(
-            dbc.Col(
-                html.H3(
-                    title_rq3,
-                    className="text-primary",
-                ),
-                width=12,
+    
+    # ==================== Research Question 3 (Mahfuz) ====================
+    html.H1(
+        "Bird Species Diversity Dashboard",
+        className="text-center my-4",
+    ),
+    dbc.Row(
+        dbc.Col(
+            html.H3(
+                title_rq3,
+                className="text-primary",
             ),
-            className="mb-3 mx-3",
+            width=12,
         ),
-        dbc.Row(
-            dbc.Col(
-                html.H4(
-                    "By Mahfuz",
-                    className="lead",
-                ),
-                width=12,
+        className="mb-3 mx-3",
+    ),
+    dbc.Row(
+        dbc.Col(
+            html.H4(
+                "By Mahfuz",
+                className="lead",
             ),
-            className="mb-3 mx-3",
+            width=12,
         ),
-        dbc.Row(
-            dbc.Col(
-                html.P(
-                    description_rq3,
-                    className="lead",
-                ),
-                width=12,
+        className="mb-3 mx-3",
+    ),
+    dbc.Row(
+        dbc.Col(
+            html.P(
+                description_rq3,
+                className="lead",
             ),
-            className="mb-4 mx-3",
+            width=12,
         ),
-        dbc.Row(
-            dbc.Col(
-                dcc.Graph(
-                    id="species-diversity-graph",
-                    figure=species_diversity_fig,
-                    style={"height": "70vh"},
-                ),
-                width=10,
+        className="mb-4 mx-3",
+    ),
+    dbc.Row(
+        dbc.Col(
+            dcc.Graph(
+                id="species-diversity-graph",
+                figure=species_diversity_fig,
+                style={"height": "70vh"},
             ),
-            justify="center",
-            className="mb-4",
+            width=10,
         ),
-    ],
-    fluid=True,
-    style={
-        "backgroundColor": "#f9fafb",
-        "minHeight": "100vh",
-        "padding": "2rem 1rem",
-    },
-)
+        justify="center",
+        className="mb-4",
+    ),
+    
+    # ==================== Research Question 4 (Hafijur Rahman) ====================
+    html.H1("Environmental Drivers of Habitat Suitability", className="text-center my-4"),
+    dbc.Row(
+        dbc.Col(
+            html.H3(
+                "Research Question: How do temperature, precipitation, and human activity shape "
+                "habitat suitability patterns for bird species across Asia (1980–2010)?",
+                className="text-primary"
+            ),
+            width=12
+        ),
+        className="mb-3 mx-3"
+    ),
+    dbc.Row(dbc.Col(html.H4("By Md Hafijur Rahman", className="lead"), width=12), className="mb-3 mx-3"),
+    dbc.Row(
+        dbc.Col(
+            html.P(
+                "This analysis focuses on habitat suitability rather than population or movement. "
+                "Using scatter plots with trendlines, it examines how climatic conditions "
+                "(temperature) and anthropogenic pressure (human activity) influence habitat "
+                "suitability across Asia from 1980 to 2010.",
+                className="lead"
+            ),
+            width=12
+        ),
+        className="mb-4 mx-3"
+    ),
+    dbc.Row(
+        dbc.Col([
+            html.Label("Select Bird Species:"),
+            dcc.Dropdown(
+                id="hafijur-species-dropdown",
+                options=[{"label": s, "value": s} for s in sorted(df["bird_species"].unique())],
+                value=sorted(df["bird_species"].unique())[0],
+                clearable=False
+            )
+        ], width=6),
+        justify="center",
+        className="mb-4"
+    ),
+    dbc.Row([
+        dbc.Col(dcc.Graph(id="hafijur-temp-plot", config={'displayModeBar': False}), width=6),
+        dbc.Col(dcc.Graph(id="hafijur-human-plot", config={'displayModeBar': False}), width=6)
+    ], className="mb-5")
+    
+], fluid=True, style={'backgroundColor': '#f9fafb', 'minHeight': '100vh', 'padding': '2rem 1rem'})
 
 
-
+# ==================== Callbacks ====================
 
 @callback(
     Output('graph-1', 'figure'),
@@ -322,7 +364,8 @@ def update_graph(species):
     )
     
     return fig1, fig2, table
-#research question 2 callbacks
+
+
 @app.callback(
     [Output("bar-plot", "figure"), Output("line-plot", "figure")],
     [Input("country-dropdown", "value"),Input("bird-species-dropdown", "value")]
@@ -337,6 +380,24 @@ def update_plots(selected_country, selected_bird_species):
         selected_bird_species
     )
     return  bar_fig,line_fig
+
+
+@callback(
+    Output("hafijur-temp-plot", "figure"),
+    Output("hafijur-human-plot", "figure"),
+    Input("hafijur-species-dropdown", "value")
+)
+def update_hafijur_plots(species):
+    fig_temp, fig_human = hafijur_rs.plot_habitat_suitability_analysis(df, species)
+    for fig in [fig_temp, fig_human]:
+        fig.update_layout(
+            plot_bgcolor="white",
+            paper_bgcolor="white",
+            font={"family": "system-ui, -apple-system, sans-serif", "size": 12},
+            margin=dict(t=80, b=20, l=20, r=20)
+        )
+    return fig_temp, fig_human
+
 
 if __name__ == "__main__":
     app.run(debug=True)
